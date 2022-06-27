@@ -3,7 +3,20 @@ import { cutTexturesFromAtlas } from "./utils/cutTexturesFromAtlas.js";
 import { createAnimatedSprite } from "./utils/createAnimatedSprite.js";
 import { assetsMap } from "./AssetsMap.js";
 import { modifySprite } from "./utils/modifySprite.js";
+import { Hero } from "./hero/Hero.js";
 
+/**
+ * @typedef {{
+ * columns: number;
+ * rows: number;
+ * width: number;
+ * height: number;
+ * tile: {
+ *   width: number;
+ *   height: number;
+ * }
+ * }} AtlasData
+ */
 
 const WIDTH = 1000;
 const HEIGHT = 600;
@@ -15,10 +28,11 @@ const app = new Application({
 });
 
 app.stage.position.set(WIDTH / 2, HEIGHT / 2);
-// Add to window for debugging
-window["STAGE"] = app.stage;
 
 // Let's add the config data describing atlas
+/**
+ * @typeof AtlasData
+ */
 const atlasData = {
     columns: 7,
     rows: 11,
@@ -30,8 +44,6 @@ const atlasData = {
     }
 };
 
-window["atlasData"] = atlasData;
-
 const runGame = () => {
     const baseTexture = BaseTexture.from('adventurer');
 
@@ -39,18 +51,16 @@ const runGame = () => {
     atlas.position.set(-WIDTH / 2, -HEIGHT / 2);
     app.stage.addChild(atlas);
 
-    const idleAnimation = createAnimatedSprite({
-        textures: cutTexturesFromAtlas({ startIndex: 0, endIndex: 3, baseTexture, atlasData }),
-    });
-    modifySprite(idleAnimation, { scale: { x: 2, y: 2 } });
-    app.stage.addChild(idleAnimation);
-
-    const runLeftAnimation = createAnimatedSprite({
-        textures: cutTexturesFromAtlas({ startIndex: 43, endIndex: 49, baseTexture, atlasData }),
+    const hero = new Hero({
+        atlasData,
+        baseTexture
     });
 
-    modifySprite(runLeftAnimation, { scale: { x: 2, y: 2 }, position: { x: 100, y: 0 } });
-    app.stage.addChild(runLeftAnimation);
+    hero.view.scale.set(2);
+    app.stage.addChild(hero.view);
+
+    window["STAGE"] = app.stage;
+    window["HERO"] = hero;
 }
 
 assetsMap.sprites.forEach((spriteData) => app.loader.add(spriteData))

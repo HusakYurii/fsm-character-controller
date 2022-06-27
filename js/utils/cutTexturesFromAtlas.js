@@ -5,14 +5,7 @@ const { Texture, Rectangle } = PIXI;
  * startIndex: number;
  * endIndex: number;
  * baseTexture: BaseTexture;
- * atlasData: {
- *  column: number;
- *  row: number;
- *  tile: {
- *      width: number;
- *      height: number;
- *  }
- * }
+ * atlasData: import('../index.js').AtlasData
  * }} DataToCutTextures
  */
 
