@@ -44,12 +44,19 @@ const atlasData = {
     }
 };
 
+const KEYS = {
+    UP: "Space",
+    DOWN: "ArrowDown",
+    LEFT: "ArrowLeft",
+    RIGHT: "ArrowRight"
+};
+
+const validatorFactory = (array) => {
+    return (value) => array.includes(value)
+};
+
 const runGame = () => {
     const baseTexture = BaseTexture.from('adventurer');
-
-    const atlas = new Sprite(new Texture(baseTexture));
-    atlas.position.set(-WIDTH / 2, -HEIGHT / 2);
-    app.stage.addChild(atlas);
 
     const hero = new Hero({
         atlasData,
@@ -57,10 +64,93 @@ const runGame = () => {
     });
 
     hero.view.scale.set(2);
+    hero.view.idle();
     app.stage.addChild(hero.view);
 
     window["STAGE"] = app.stage;
     window["HERO"] = hero;
+
+    let isJumping = false;
+    let isFalling = false;
+    const keysClicked = [];
+    const isValidKey = validatorFactory(Object.values(KEYS));
+    const hasKey = validatorFactory(keysClicked);
+
+    // create something to control the character
+    window.addEventListener("keydown", (e) => {
+        if (!isValidKey(e.code) || hasKey(e.code)) {
+            return;
+        }
+        keysClicked.push(e.code);
+
+        switch (e.code) {
+            case (KEYS.UP):
+                if (isJumping) {
+                    return;
+                }
+                hero.view.jump(() => {
+                    let loopTimes = 0;
+                    hero.view.fall();
+                    hero.view.onLoop(() => {
+                        loopTimes++
+                        if (loopTimes > 4) {
+                            isFalling = false;
+                            isJumping = false;
+                            hero.view.idle();
+                        }
+                    })
+                    isFalling = true;
+                });
+                isJumping = true;
+                break;
+            case (KEYS.DOWN):
+                console.log("Sit down")
+                break;
+            case (KEYS.LEFT):
+                if (isJumping || isFalling) {
+                    hero.view.turnLeft();
+                } else {
+                    hero.view.runLeft();
+                }
+                break;
+            case (KEYS.RIGHT):
+                if (isJumping || isFalling) {
+                    hero.view.turnRight();
+                } else {
+                    hero.view.runRight();
+                }
+                break;
+            default:
+                throw new Error("WTF!?")
+        }
+    })
+
+    window.addEventListener("keyup", (e) => {
+        if (!hasKey(e.code)) {
+            return;
+        }
+        keysClicked.splice(keysClicked.indexOf(e.code), 1);
+
+        switch (e.code) {
+            case (KEYS.UP):
+                break;
+            case (KEYS.DOWN):
+                break;
+            case (KEYS.LEFT):
+                if (!isJumping || !isFalling) {
+                    hero.view.idle();
+                }
+                break;
+            case (KEYS.RIGHT):
+                if (!isJumping || !isFalling) {
+                    hero.view.idle();
+                }
+                break;
+            default:
+                throw new Error("WTF!?")
+        }
+
+    })
 }
 
 assetsMap.sprites.forEach((spriteData) => app.loader.add(spriteData))

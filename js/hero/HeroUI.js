@@ -85,6 +85,10 @@ export class HeroUI extends Container {
         this._currentAnimation.scale.set(1 * this._direction, 1);
     }
 
+    onLoop(cb) {
+        this._currentAnimation.onLoop = cb;
+    }
+
     _switchAnimation(newAnimation, loop = true, onComplete = () => {/* */ }) {
         this._currentAnimation.visible = false;
         this._currentAnimation.stop();
