@@ -71,6 +71,7 @@ const runGame = () => {
     window["HERO"] = hero;
 
     let isJumping = false;
+    let isFalling = false;
     const keysClicked = [];
     const isValidKey = validatorFactory(Object.values(KEYS));
     const hasKey = validatorFactory(keysClicked);
@@ -84,8 +85,21 @@ const runGame = () => {
 
         switch (e.code) {
             case (KEYS.UP):
+                if (isJumping) {
+                    return;
+                }
                 hero.view.jump(() => {
+                    let loopTimes = 0;
                     hero.view.fall();
+                    hero.view.onLoop(() => {
+                        loopTimes++
+                        if (loopTimes > 4) {
+                            isFalling = false;
+                            isJumping = false;
+                            hero.view.idle();
+                        }
+                    })
+                    isFalling = true;
                 });
                 isJumping = true;
                 break;
@@ -93,14 +107,14 @@ const runGame = () => {
                 console.log("Sit down")
                 break;
             case (KEYS.LEFT):
-                if (isJumping) {
+                if (isJumping || isFalling) {
                     hero.view.turnLeft();
                 } else {
                     hero.view.runLeft();
                 }
                 break;
             case (KEYS.RIGHT):
-                if (isJumping) {
+                if (isJumping || isFalling) {
                     hero.view.turnRight();
                 } else {
                     hero.view.runRight();
@@ -119,17 +133,16 @@ const runGame = () => {
 
         switch (e.code) {
             case (KEYS.UP):
-                isJumping = false;
                 break;
             case (KEYS.DOWN):
                 break;
             case (KEYS.LEFT):
-                if (!isJumping) {
+                if (!isJumping || !isFalling) {
                     hero.view.idle();
                 }
                 break;
             case (KEYS.RIGHT):
-                if (!isJumping) {
+                if (!isJumping || !isFalling) {
                     hero.view.idle();
                 }
                 break;
