@@ -70,7 +70,7 @@ const runGame = () => {
     window["STAGE"] = app.stage;
     window["HERO"] = hero;
 
-
+    let isJumping = false;
     const keysClicked = [];
     const isValidKey = validatorFactory(Object.values(KEYS));
     const hasKey = validatorFactory(keysClicked);
@@ -84,19 +84,27 @@ const runGame = () => {
 
         switch (e.code) {
             case (KEYS.UP):
-
-                hero.view.jump();
+                hero.view.jump(() => {
+                    hero.view.fall();
+                });
+                isJumping = true;
                 break;
             case (KEYS.DOWN):
                 console.log("Sit down")
                 break;
             case (KEYS.LEFT):
-
-                hero.view.runLeft();
+                if (isJumping) {
+                    hero.view.turnLeft();
+                } else {
+                    hero.view.runLeft();
+                }
                 break;
             case (KEYS.RIGHT):
-
-                hero.view.runRight()
+                if (isJumping) {
+                    hero.view.turnRight();
+                } else {
+                    hero.view.runRight();
+                }
                 break;
             default:
                 throw new Error("WTF!?")
@@ -111,17 +119,19 @@ const runGame = () => {
 
         switch (e.code) {
             case (KEYS.UP):
-                hero.view.idle();
+                isJumping = false;
                 break;
             case (KEYS.DOWN):
                 break;
             case (KEYS.LEFT):
-
-                hero.view.idle();
+                if (!isJumping) {
+                    hero.view.idle();
+                }
                 break;
             case (KEYS.RIGHT):
-
-                hero.view.idle();
+                if (!isJumping) {
+                    hero.view.idle();
+                }
                 break;
             default:
                 throw new Error("WTF!?")
