@@ -4,6 +4,8 @@ import { createAnimatedSprite } from "./utils/createAnimatedSprite.js";
 import { assetsMap } from "./AssetsMap.js";
 import { modifySprite } from "./utils/modifySprite.js";
 import { Hero } from "./hero/Hero.js";
+import { StateMachine } from "./fsm/StateMachine.js";
+import { AbstractState } from "./fsm/AbstractState.js";
 
 /**
  * @typedef {{
@@ -55,6 +57,38 @@ const validatorFactory = (array) => {
     return (value) => array.includes(value)
 };
 
+class FetchData extends AbstractState {
+    constructor(fsm) {
+        super("FetchData", fsm)
+    }
+
+    enter() {
+        fetch('https://jsonplaceholder.typicode.com/todos/1')
+            .then(response => response.json())
+            .then(data => this.fsm.changeStateTo(new ProcessData(this.fsm, data)))
+    }
+
+    exit(onFinish) {
+        onFinish()
+    }
+}
+
+class ProcessData extends AbstractState {
+    constructor(fsm, data) {
+        super("ProcessData", fsm);
+        this._data = data;
+    }
+
+    enter() {
+        console.log(this._data)
+    }
+
+    exit(onFinish) {
+        onFinish();
+    }
+}
+
+
 const runGame = () => {
     const baseTexture = BaseTexture.from('adventurer');
 
@@ -63,8 +97,11 @@ const runGame = () => {
         baseTexture
     });
 
+    const fsm = new StateMachine({});
+    fsm.changeStateTo(new FetchData(fsm));
+
     hero.view.scale.set(2);
-    hero.view.idle();
+    // hero.view.idle();
     app.stage.addChild(hero.view);
 
     window["STAGE"] = app.stage;
