@@ -1,15 +1,28 @@
 import { AbstractState } from "../fsm/AbstractState.js";
+import { IdleState } from "./IdleState.js";
 
 export class RunRightState extends AbstractState {
     constructor(fsm) {
-        super("RunRightState", fsm)
+        super("RunRightState", fsm);
+
+        this._onKeyDown = this._onKeyDown.bind(this);
     }
 
     enter() {
+        window.addEventListener("keyup", this._onKeyDown);
+
         this.fsm.target.view.runRight();
     }
 
     exit(onFinish) {
+        window.removeEventListener("keyup", this._onKeyDown);
+
         onFinish()
+    }
+
+    _onKeyDown(event) {
+        if (event.code === "ArrowRight") {
+            this.fsm.changeStateTo(new IdleState(this.fsm));
+        }
     }
 }
