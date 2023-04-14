@@ -4,25 +4,18 @@ import { IdleState } from "./IdleState.js";
 export class RunLeftState extends AbstractState {
     constructor(fsm) {
         super("RunLeftState", fsm);
-
-        this._onKeyDown = this._onKeyDown.bind(this);
     }
 
     enter() {
-        window.addEventListener("keyup", this._onKeyDown);
+        this.fsm.target.hero.view.runLeft();
 
-        this.fsm.target.view.runLeft();
+        this.fsm.target.controls.onLeftClicked = (isKeyDown) => {
+            if (!isKeyDown) this.fsm.changeStateTo(new IdleState(this.fsm));
+        };
     }
 
     exit(onFinish) {
-        window.removeEventListener("keyup", this._onKeyDown);
-
-        onFinish()
-    }
-
-    _onKeyDown(event) {
-        if (event.code === "ArrowLeft") {
-            this.fsm.changeStateTo(new IdleState(this.fsm));
-        }
+        this.fsm.target.controls.removeAllListeners();
+        onFinish();
     }
 }

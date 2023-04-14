@@ -6,6 +6,7 @@ import { modifySprite } from "./utils/modifySprite.js";
 import { Hero } from "./hero/Hero.js";
 import { StateMachine } from "./fsm/StateMachine.js";
 import { IdleState } from "./hero-states/IdleState.js";
+import { KeyboardController } from "./utils/KeyboardController.js";
 
 /**
  * @typedef {{
@@ -46,17 +47,6 @@ const atlasData = {
     }
 };
 
-const KEYS = {
-    UP: "Space",
-    DOWN: "ArrowDown",
-    LEFT: "ArrowLeft",
-    RIGHT: "ArrowRight"
-};
-
-const validatorFactory = (array) => {
-    return (value) => array.includes(value)
-};
-
 const runGame = () => {
     const baseTexture = BaseTexture.from('adventurer');
 
@@ -65,11 +55,15 @@ const runGame = () => {
         baseTexture
     });
 
-    const fsm = new StateMachine(hero);
+    const target = {
+        hero: hero,
+        controls: new KeyboardController()
+    };
+
+    const fsm = new StateMachine(target);
     fsm.changeStateTo(new IdleState(fsm));
 
-    hero.view.scale.set(2);
-    // hero.view.idle();
+    hero.view.scale.set(3);
     app.stage.addChild(hero.view);
 
     window["STAGE"] = app.stage;
